@@ -1,36 +1,44 @@
 /*
 
-Copyright 2018,2019 Jonathan Smith
+Copyright 2018-2019 Jonathan Smith
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in 
 the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so, 
-subject to the following conditions:
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+of the Software, and to permit persons to whom the Software is furnished to do 
+so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all 
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+SOFTWARE.
 
 */
+
+#if defined(_MSC_VER)
+// Until fmtlib uses std::invoke_result instead of std::result_of, this needs to
+// be here.
+#define _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
+#endif
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 
 #include "cxxopts.hpp"
+#define FMT_HEADER_ONLY
+#include "fmt/format.h"
 
 #include "convert_cast.h"
 #include "ines_header.h"
@@ -54,11 +62,15 @@ struct ConvertCast<bool, std::string>
 
 } // namespace jvs
 
-template <typename T>
-bool readData(std::istream& is, T& value)
+static std::string hexAddr(std::uint16_t addr)
 {
-  is.read(reinterpret_cast<char*>(&value), sizeof(value));
-  return (is.good());
+  return fmt::format("{}{:04X}", "0x", addr);
+}
+
+template <typename T>
+std::string tableRow(const std::string& label, T value)
+{
+  return fmt::format("{:<20}: {}\n", label, value);
 }
 
 int main(int argc, char** argv)
@@ -103,43 +115,38 @@ int main(int argc, char** argv)
   }
 
   // read the iNES header
-  auto romHeaderErr = jvs::ReadHeader(is);
-  if (!romHeaderErr)
+  auto romHeaderBuf = jvs::ReadHeader(is);
+  if (!romHeaderBuf)
   {
     std::cerr << "Failed to read ROM header: "
-      << romHeaderErr.error().message() << "\n";
-    return romHeaderErr.error().value();
+      << romHeaderBuf.error().message() << "\n";
+    return romHeaderBuf.error().value();
   }
 
-  jvs::INesHeader& romHeader = romHeaderErr.get();
+  jvs::INesHeader& romHeader = romHeaderBuf.get();
   if (!romHeader.IsValid())
   {
     std::cerr << "Bad iNES ROM signature.\n";
     return 1;
   }
 
-  std::cout << "NES version: "
-    << romHeader.version() << "\n"
-    << "PRG ROM page count: "
-    << romHeader.prg_rom_page_count() << " ("
-    << romHeader.prg_rom_byte_count() << " bytes)\n"
-    << "CHR ROM page count: "
-    << romHeader.chr_rom_page_count() << " ("
-    << romHeader.chr_rom_byte_count() << " bytes)\n"
-    << "Battery: "
-    << jvs::ConvertTo<std::string>(romHeader.has_battery()) << "\n"
-    << "Four-screen mode: "
-    << jvs::ConvertTo<std::string>(romHeader.is_four_screen_mode()) << "\n"
-    << "Mapper: "
-    << romHeader.mapper_number() << "\n"
-    << "Mirroring: "
-    << jvs::ConvertTo<std::string>(romHeader.mirroring()) << "\n"
-    << "Playchoice 10: "
-    << jvs::ConvertTo<std::string>(romHeader.is_playchoice_10()) << "\n"
-    << "Trainer: "
-    << jvs::ConvertTo<std::string>(romHeader.has_trainer()) << "\n"
-    << "VS UniSystem: "
-    << jvs::ConvertTo<std::string>(romHeader.is_vs_unisystem()) << "\n";
+  std::cout << tableRow("NES version", romHeader.version())
+    << tableRow("PRG ROM page count", 
+      fmt::format("{} ({} bytes)", romHeader.prg_rom_page_count(), 
+        romHeader.prg_rom_byte_count()))
+    << tableRow("CHR ROM page count",
+      fmt::format("{} ({} bytes)", romHeader.chr_rom_page_count(),
+        romHeader.chr_rom_byte_count()))
+    << tableRow("Battery", jvs::ConvertTo<std::string>(romHeader.has_battery()))
+    << tableRow("Four-screen mode", 
+      jvs::ConvertTo<std::string>(romHeader.is_four_screen_mode()))
+    << tableRow("Mapper", romHeader.mapper_number())
+    << tableRow("Mirroring", jvs::ConvertTo<std::string>(romHeader.mirroring()))
+    << tableRow("Playchoice 10", 
+      jvs::ConvertTo<std::string>(romHeader.is_playchoice_10()))
+    << tableRow("Trainer", jvs::ConvertTo<std::string>(romHeader.has_trainer()))
+    << tableRow("VS UniSystem", 
+      jvs::ConvertTo<std::string>(romHeader.is_vs_unisystem()));
 
   auto interruptVectors = jvs::ReadInterruptVectors(is, romHeader);
   if (!interruptVectors)
@@ -149,18 +156,9 @@ int main(int argc, char** argv)
     return interruptVectors.error().value();
   }
 
-  std::cout << "NMI vector: "
-    << "0x" << std::setw(4) << std::setfill('0') << std::hex
-    << interruptVectors->nmi()
-    << std::dec << "\n";
-  std::cout << "Reset vector: "
-    << "0x" << std::setw(4) << std::setfill('0') << std::hex
-    << interruptVectors->reset()
-    << std::dec << "\n";
-  std::cout << "IRQ/BRK vector: "
-    << "0x" << std::setw(4) << std::setfill('0') << std::hex
-    << interruptVectors->irq()
-    << std::dec << "\n";
+  std::cout << tableRow("NMI vector", hexAddr(interruptVectors->nmi()))
+    << tableRow("Reset vector", hexAddr(interruptVectors->reset()))
+    << tableRow("IRQ/BRK vector", hexAddr(interruptVectors->irq()));
 
   // FIXME: Legacy code follows.
 

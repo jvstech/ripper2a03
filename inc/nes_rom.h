@@ -18,10 +18,16 @@ Expected<std::vector<std::uint8_t>> ReadPrgRomPage(std::istream& is,
 
 //!
 //! @brief
-//!   Reads the interrupt vectors from the last PRG ROM page only
+//!   Reads the interrupt vectors from the given PRG ROM page
 //!
 Expected<InterruptVectors> ReadInterruptVectors(std::istream& is,
   const INesHeader& header, unsigned int prgPageNumber = ~0U);
+
+//!
+//! @brief
+//!   Reads the interrupt vectors from all PRG ROM pages
+Expected<std::vector<InterruptVectors>> ReadAllInterruptVectors(
+  std::istream& is, const INesHeader& header);
 
 } // namespace jvs
 

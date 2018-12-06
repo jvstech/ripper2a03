@@ -6,8 +6,8 @@
 //!
 
 // This file is a very minimally changed derivative of the 
-// llvm/Support/ErrorOr.h header.As such, I'm including the LLVM release license 
-// here:
+// llvm/Support/ErrorOr.h header. As such, I'm including the LLVM release
+// license here:
 
 /*
 

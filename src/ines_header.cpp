@@ -153,6 +153,7 @@ unsigned int jvs::INesHeader::GetPrgRomOffset() const
 
 unsigned int jvs::INesHeader::GetPrgRomPageOffset(unsigned int pageNumber) const
 {
+  // TODO: handle trainer data if it exists
   pageNumber = (pageNumber >= this->prg_rom_page_count()
     ? this->prg_rom_page_count() - 1
     : pageNumber);

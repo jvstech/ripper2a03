@@ -78,3 +78,22 @@ jvs::Expected<jvs::InterruptVectors> jvs::ReadInterruptVectors(std::istream& is,
   std::memcpy(&ret, vectors, 6);
   return ret;
 }
+
+auto jvs::ReadAllInterruptVectors(std::istream& is, const INesHeader& header)
+  -> jvs::Expected<std::vector<jvs::InterruptVectors>>
+{
+  std::vector<InterruptVectors> ret{};
+  ret.reserve(header.prg_rom_page_count());
+  for (unsigned int i = 0; i < header.prg_rom_page_count(); i++)
+  {
+    auto ivBuf = ReadInterruptVectors(is, header, i);
+    if (!ivBuf)
+    {
+      return ivBuf.error();
+    }
+
+    ret.push_back(*ivBuf);
+  }
+
+  return ret;
+}
