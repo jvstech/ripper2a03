@@ -1,0 +1,6 @@
+# CMake configuration for VS2017
+CMakeSettings.json
+
+# VS2017 and VSCode config files.
+.vscode
+.vs
