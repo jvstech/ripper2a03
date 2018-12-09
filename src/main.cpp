@@ -42,6 +42,7 @@ SOFTWARE.
 
 #include "convert_cast.h"
 #include "ines_header.h"
+#include "instruction.h"
 #include "mirroring_kind.h"
 #include "nes_rom.h"
 
@@ -159,6 +160,8 @@ int main(int argc, char** argv)
   std::cout << tableRow("NMI vector", hexAddr(interruptVectors->nmi()))
     << tableRow("Reset vector", hexAddr(interruptVectors->reset()))
     << tableRow("IRQ/BRK vector", hexAddr(interruptVectors->irq()));
+
+  // TODO: start disassembly and analysis here
 
   // FIXME: Legacy code follows.
 

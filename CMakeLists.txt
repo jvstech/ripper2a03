@@ -35,6 +35,7 @@ message("fmtlib source directory: ${fmtlibSourceDir}")
 
 set(sources 
   ${srcDir}/ines_header.cpp
+  ${srcDir}/instruction.cpp
   ${srcDir}/main.cpp
   ${srcDir}/nes_rom.cpp
   )
