@@ -13,6 +13,7 @@ namespace jvs
 {
 
 Expected<INesHeader> ReadHeader(std::istream& is);
+
 Expected<std::vector<std::uint8_t>> ReadPrgRomPage(std::istream& is,
   const INesHeader& header, unsigned int prgPageNumber);
 
@@ -26,6 +27,7 @@ Expected<InterruptVectors> ReadInterruptVectors(std::istream& is,
 //!
 //! @brief
 //!   Reads the interrupt vectors from all PRG ROM pages
+//!
 Expected<std::vector<InterruptVectors>> ReadAllInterruptVectors(
   std::istream& is, const INesHeader& header);
 

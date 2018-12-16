@@ -37,6 +37,7 @@ set(sources
   ${srcDir}/ines_header.cpp
   ${srcDir}/instruction.cpp
   ${srcDir}/main.cpp
+  ${srcDir}/mnemonics.cpp
   ${srcDir}/nes_rom.cpp
   )
 

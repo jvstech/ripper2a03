@@ -14,7 +14,7 @@ struct ConvertCast
 };
 
 template <typename ToType, typename FromType>
-static ToType ConvertTo(const FromType& value)
+static auto ConvertTo(const FromType& value)
 {
   return ConvertCast<FromType, ToType>{}(value);
 }

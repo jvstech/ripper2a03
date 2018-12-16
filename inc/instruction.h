@@ -7,6 +7,7 @@
 #include <string>
 
 #include "addressing_mode.h"
+#include "mnemonics.h"
 
 namespace jvs
 {
@@ -19,7 +20,7 @@ struct Instruction
   Instruction& operator=(const Instruction&) = default;
   Instruction& operator=(Instruction&&) = default;
 
-  Instruction(std::uint8_t opCode, const char* mnemonic,
+  Instruction(std::uint8_t opCode, MOSM mnemonic,
     AddressingMode addressingMode, unsigned int byteCount, bool isCFI,
     bool isTerminator);
 
@@ -28,7 +29,7 @@ struct Instruction
     return this->opcode_;
   }
 
-  const char* mnemonic() const
+  MOSM mnemonic() const
   {
     return this->mnemonic_;
   }
@@ -56,7 +57,7 @@ struct Instruction
 
 private:
   std::uint8_t opcode_{0};
-  const char* mnemonic_{nullptr};
+  MOSM mnemonic_{};
   AddressingMode addressing_mode_{AddressingMode::Absolute};
   unsigned int byte_count_{0};
   bool is_cfi_{false};
@@ -67,7 +68,7 @@ constexpr unsigned int InstructionCount = 0xff;
 
 std::array<Instruction, InstructionCount>& GetInstructionSet();
 Instruction& GetInstruction(std::uint8_t opCode);
-Instruction& SetInstruction(std::uint8_t opCode, const char* mnemonic,
+Instruction& SetInstruction(std::uint8_t opCode, MOSM mnemonic,
   AddressingMode addressingMode, unsigned int byteCount, bool isCFI = false,
   bool isTerminator = false);
 void InitializeInstructionSet();
