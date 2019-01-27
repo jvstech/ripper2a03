@@ -11,6 +11,7 @@ include(ExternalProject)
 ExternalProject_Add(cxxopts_ext
   PREFIX ${CMAKE_BINARY_DIR}/cxxopts
   GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+  GIT_TAG 9990f73845d76106063536d7cd630ac15cb4a065
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
@@ -24,6 +25,7 @@ message("cxxopts source directory: ${cxxoptsSourceDir}")
 ExternalProject_Add(fmtlib_ext
   PREFIX ${CMAKE_BINARY_DIR}/fmtlib
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 9f70b034e1cbd39e6beee8de7cf0bafba8ee4f80
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
@@ -34,6 +36,7 @@ set(fmtlibSourceDir ${SOURCE_DIR})
 message("fmtlib source directory: ${fmtlibSourceDir}")
 
 set(sources 
+  ${srcDir}/cl_options.cpp
   ${srcDir}/ines_header.cpp
   ${srcDir}/instruction.cpp
   ${srcDir}/main.cpp

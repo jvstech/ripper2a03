@@ -97,3 +97,27 @@ auto jvs::ReadAllInterruptVectors(std::istream& is, const INesHeader& header)
 
   return ret;
 }
+
+std::error_code jvs::WritePrgRomData(std::istream& is, 
+  const INesHeader& header, unsigned int prgPageNumber, std::ostream& os)
+{
+  if (!is.good() || !os.good())
+  {
+    return std::make_error_code(std::errc::io_error);
+  }
+
+  auto prgPage = ReadPrgRomPage(is, header, prgPageNumber);
+  if (!prgPage)
+  {
+    return prgPage.error();
+  }
+
+  os.write(reinterpret_cast<const char*>(prgPage->data()), prgPage->size());
+  if (!os.good())
+  {
+    return std::make_error_code(std::errc::io_error);
+  }
+
+  os.flush();
+  return {};
+}

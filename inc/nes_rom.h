@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <istream>
+#include <ostream>
+#include <system_error>
 #include <vector>
 
 #include "expected.h"
@@ -30,6 +32,9 @@ Expected<InterruptVectors> ReadInterruptVectors(std::istream& is,
 //!
 Expected<std::vector<InterruptVectors>> ReadAllInterruptVectors(
   std::istream& is, const INesHeader& header);
+
+std::error_code WritePrgRomData(std::istream& is, const INesHeader& header,
+  unsigned int prgPageNumber, std::ostream& os);
 
 } // namespace jvs
 
