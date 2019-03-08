@@ -13,7 +13,7 @@ enum class AddressingMode
   Accumulator,
   DirectPage,
   DPIndexedX,
-  DPIndexedIndirectX,
+  DPIndirectIndexedX,
   DPIndexedY,
   DPIndexedIndirectY,
   Immediate,

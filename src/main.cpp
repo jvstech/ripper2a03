@@ -48,7 +48,7 @@ SOFTWARE.
 #include "convert_cast.h"
 #include "expected.h"
 #include "ines_header.h"
-#include "instruction.h"
+#include "instruction_info.h"
 #include "mirroring_kind.h"
 #include "nes_rom.h"
 
@@ -250,6 +250,10 @@ int main(int argc, char** argv)
     << tableRow("IRQ/BRK vector", hexAddr(interruptVectors->irq()));
 
   // TODO: start disassembly and analysis here
+  if (romHeader.mapper_number() != 0)
+  {
+    //jvs::AnalyzeMMCConfig();
+  }
 
   // Perform extraction
   if (extractPrg)
@@ -282,6 +286,19 @@ int main(int argc, char** argv)
     else
     {
       // MMC1 logical extraction based on options
+
+      // NOTE: There are some big liberties being taken here -- primarily the 
+      // assumption that the last PRG ROM page will be fixed to the second PRG 
+      // bank. The second is that the CHR ROM page addreses are filled with NOP
+      // instructions. This was primarily to aid IDA with its auto-analysis, but
+      // it's a bad way of doing things (and no longer necessary). I have the
+      // option to place a JMP to the reset vector at the first instruction in 
+      // the extracted files (also to help with IDA's auto-analysis, and also 
+      // no longer necessary). This is why I want to finish a thin emulation 
+      // implementation so the game code can be followed and the CPU and PPU
+      // control register writes done in the reset vector can be intercepted so 
+      // *proper* page extraction can be done here.
+
       constexpr std::size_t firstBankOffset = 0x8000;
       constexpr std::size_t secondBankOffset = 0xC000;
       bool fixedLastBank = !fixedFirstPrg;

@@ -3,7 +3,9 @@
 
 #include <cstdint>
 #include <istream>
+#include <memory>
 #include <ostream>
+#include <string>
 #include <system_error>
 #include <vector>
 
@@ -13,6 +15,37 @@
 
 namespace jvs
 {
+
+class NesRom
+{
+public:
+  const INesHeader& header() const
+  {
+    return header_;
+  }
+
+  const InterruptVectors& interrupt_vectors() const
+  {
+    return interrupt_vectors_;
+  }
+
+  static Expected<NesRom> FromFile(const std::string& fileName);
+
+  static Expected<NesRom> FromStream(std::istream& is);
+
+private:
+  std::istream* input_stream_{nullptr};
+  std::unique_ptr<std::istream> owned_input_stream_{};
+  INesHeader header_{};
+  InterruptVectors interrupt_vectors_{};
+
+  std::istream& input_stream()
+  {
+    return *input_stream_;
+  }
+
+  std::error_code init(std::istream* is);
+};
 
 Expected<INesHeader> ReadHeader(std::istream& is);
 

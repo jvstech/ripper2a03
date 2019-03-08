@@ -38,7 +38,11 @@ message("fmtlib source directory: ${fmtlibSourceDir}")
 set(sources 
   ${srcDir}/cl_options.cpp
   ${srcDir}/ines_header.cpp
-  ${srcDir}/instruction.cpp
+  ${srcDir}/instruction_data.cpp
+  ${srcDir}/instruction_info.cpp
+  ${srcDir}/instruction_visitor.cpp
+  ${srcDir}/internal_ram.cpp
+  ${srcDir}/internal_ram_address_line.cpp
   ${srcDir}/main.cpp
   ${srcDir}/mnemonics.cpp
   ${srcDir}/nes_rom.cpp

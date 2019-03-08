@@ -1,5 +1,5 @@
-#if !defined(JVS_RIPPER2A03_INSTRUCTION_H_)
-#define JVS_RIPPER2A03_INSTRUCTION_H_
+#if !defined(JVS_RIPPER2A03_INSTRUCTION_INFO_H_)
+#define JVS_RIPPER2A03_INSTRUCTION_INFO_H_
 
 #include <array>
 #include <cstddef>
@@ -12,15 +12,16 @@
 namespace jvs
 {
 
-struct Instruction
+struct InstructionInfo
 {
-  Instruction() = default;
-  Instruction(const Instruction&) = default;
-  Instruction(Instruction&&) = default;
-  Instruction& operator=(const Instruction&) = default;
-  Instruction& operator=(Instruction&&) = default;
+  InstructionInfo() = default;
+  InstructionInfo(const InstructionInfo&) = default;
+  InstructionInfo(InstructionInfo&&) = default;
+  InstructionInfo& operator=(const InstructionInfo&) = default;
+  InstructionInfo& operator=(InstructionInfo&&) = default;
+  virtual ~InstructionInfo() = default;
 
-  Instruction(std::uint8_t opCode, MOSM mnemonic,
+  InstructionInfo(std::uint8_t opCode, MOSM mnemonic,
     AddressingMode addressingMode, unsigned int byteCount, bool isCFI,
     bool isTerminator);
 
@@ -32,6 +33,11 @@ struct Instruction
   MOSM mnemonic() const
   {
     return this->mnemonic_;
+  }
+
+  AddressingMode addressing_mode() const
+  {
+    return this->addressing_mode_;
   }
 
   unsigned int byte_count() const
@@ -54,6 +60,10 @@ struct Instruction
     return (this->byte_count_ == 0);
   }
 
+  explicit operator bool() const
+  {
+    return (!(this->IsEmpty()));
+  }
 
 private:
   std::uint8_t opcode_{0};
@@ -66,13 +76,12 @@ private:
 
 constexpr unsigned int InstructionCount = 0xff;
 
-std::array<Instruction, InstructionCount>& GetInstructionSet();
-Instruction& GetInstruction(std::uint8_t opCode);
-Instruction& SetInstruction(std::uint8_t opCode, MOSM mnemonic,
+std::array<InstructionInfo, InstructionCount>& GetInstructionInfoSet();
+InstructionInfo& GetInstructionInfo(std::uint8_t opCode);
+InstructionInfo& SetInstructionInfo(std::uint8_t opCode, MOSM mnemonic,
   AddressingMode addressingMode, unsigned int byteCount, bool isCFI = false,
   bool isTerminator = false);
-void InitializeInstructionSet();
 
 } // namespace jvs
 
-#endif // !JVS_RIPPER2A03_INSTRUCTION_H_
+#endif // !JVS_RIPPER2A03_INSTRUCTION_INFO_H_

@@ -4,12 +4,12 @@
 namespace jvs
 {
 
-template <typename T, typename U>
+template <typename FromType, typename ToType>
 struct ConvertCast 
 {
-  U operator()(const T& value) const
+  ToType operator()(const FromType& value) const
   {
-    return reinterpret_cast<U>(value);
+    return reinterpret_cast<ToType>(value);
   }
 };
 

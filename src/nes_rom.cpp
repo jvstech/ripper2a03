@@ -1,6 +1,9 @@
 #include "nes_rom.h"
 
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <functional>
 #include <istream>
 #include <string>
 #include <system_error>
@@ -10,6 +13,76 @@
 #include "ines_header.h"
 #include "interrupt_vectors.h"
 
+
+jvs::Expected<jvs::NesRom> jvs::NesRom::FromFile(const std::string& fileName)
+{
+  namespace fs = std::filesystem;
+  fs::path filePath = fileName;
+  if (!fs::exists(filePath))
+  {
+    return std::make_error_code(std::errc::no_such_file_or_directory);
+  }
+
+  NesRom rom{};
+  std::unique_ptr<std::istream> fileStream{new std::ifstream(filePath, 
+    std::ios::binary)};
+  if (!fileStream->good())
+  {
+    return std::make_error_code(std::errc::io_error);
+  }
+
+  rom.owned_input_stream_ = std::move(fileStream);
+  auto ec = rom.init(rom.owned_input_stream_.get());
+  if (ec)
+  {
+    return ec;
+  }
+
+  return rom;
+}
+
+jvs::Expected<jvs::NesRom> jvs::NesRom::FromStream(std::istream& is)
+{
+  NesRom rom{};
+  auto ec = rom.init(std::addressof(is));
+  if (ec)
+  {
+    return ec;
+  }
+
+  return rom;
+}
+
+std::error_code jvs::NesRom::init(std::istream* is)
+{
+  input_stream_ = is;
+  if (!input_stream_)
+  {
+    return std::make_error_code(std::errc::no_stream_resources);
+  }
+
+  auto hdr = ReadHeader(input_stream());
+  if (!hdr)
+  {
+    return hdr.error();
+  }
+  
+  if (!hdr->IsValid())
+  {
+    return std::make_error_code(std::errc::illegal_byte_sequence);
+  }
+
+  header_ = std::move(*hdr);
+
+  auto interruptVectors = ReadInterruptVectors(input_stream(), header_);
+  if (!interruptVectors)
+  {
+    return interruptVectors.error();
+  }
+
+  interrupt_vectors_ = std::move(*interruptVectors);
+  return {};
+}
 
 jvs::Expected<jvs::INesHeader> jvs::ReadHeader(std::istream& is)
 {
